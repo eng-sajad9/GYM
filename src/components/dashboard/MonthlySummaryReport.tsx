@@ -169,21 +169,19 @@ export const MonthlySummaryReport: React.FC<MonthlySummaryReportProps> = ({
         <div className="flex items-center gap-2 bg-neutral-950 p-1.5 rounded-2xl border border-neutral-800 shrink-0">
           <button
             onClick={() => setSelectedMonthOffset(0)}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all min-h-[38px] ${
-              selectedMonthOffset === 0
-                ? 'bg-amber-500 text-neutral-950 shadow-md font-black'
-                : 'text-neutral-400 hover:text-white'
-            }`}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all min-h-[38px] ${selectedMonthOffset === 0
+              ? 'bg-amber-500 text-neutral-950 shadow-md font-black'
+              : 'text-neutral-400 hover:text-white'
+              }`}
           >
             الشهر الحالي 📅
           </button>
           <button
             onClick={() => setSelectedMonthOffset(1)}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all min-h-[38px] ${
-              selectedMonthOffset === 1
-                ? 'bg-amber-500 text-neutral-950 shadow-md font-black'
-                : 'text-neutral-400 hover:text-white'
-            }`}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all min-h-[38px] ${selectedMonthOffset === 1
+              ? 'bg-amber-500 text-neutral-950 shadow-md font-black'
+              : 'text-neutral-400 hover:text-white'
+              }`}
           >
             الشهر السابق ⏪
           </button>
