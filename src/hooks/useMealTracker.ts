@@ -32,6 +32,7 @@ export function useMealTracker(activeUserId?: string) {
   const [profile, setProfile] = useState<UserProfile>({ ...INITIAL_PROFILE, id: activeUserId || '' });
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]!);
   const [mealLogs, setMealLogs] = useState<DatabaseMealLog[]>([]);
+  const [monthlyMealLogs, setMonthlyMealLogs] = useState<DatabaseMealLog[]>([]);
   const [customMeals, setCustomMeals] = useState<CustomMeal[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -130,6 +131,17 @@ export function useMealTracker(activeUserId?: string) {
     }
   }, []);
 
+  // ── Fetch all monthly meal logs ───────────────────────────────────
+  const fetchMonthlyData = useCallback(async (uid: string) => {
+    if (!uid) { setMonthlyMealLogs([]); return; }
+    try {
+      const data = await FirebaseMealService.getMonthlyMealLogs(uid);
+      setMonthlyMealLogs(data.map(toDBMealLog));
+    } catch {
+      setMonthlyMealLogs([]);
+    }
+  }, []);
+
   // ── Fetch custom meals ────────────────────────────────────────────
   const fetchCustomMeals = useCallback(async (uid: string) => {
     if (!uid) return;
@@ -147,8 +159,9 @@ export function useMealTracker(activeUserId?: string) {
       fetchUserProfile(currentUserId);
       fetchCustomMeals(currentUserId);
       fetchDateData(currentUserId, selectedDate);
+      fetchMonthlyData(currentUserId);
     }
-  }, [currentUserId, selectedDate, fetchUserProfile, fetchCustomMeals, fetchDateData]);
+  }, [currentUserId, selectedDate, fetchUserProfile, fetchCustomMeals, fetchDateData, fetchMonthlyData]);
 
   // ── Update profile + nutrition settings in Firestore ─────────────
   const handleUpdateProfile = async (updated: Partial<UserProfile>) => {
@@ -315,6 +328,7 @@ export function useMealTracker(activeUserId?: string) {
     selectedDate,
     setSelectedDate,
     mealLogs,
+    monthlyMealLogs,
     customMeals,
     isLoading,
     notification,

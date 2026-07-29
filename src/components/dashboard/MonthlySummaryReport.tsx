@@ -70,21 +70,20 @@ export const MonthlySummaryReport: React.FC<MonthlySummaryReportProps> = ({
   const targetMonthlyCarbs = (profile.dailyCarbsGoalG || 220) * daysInMonth;
   const targetMonthlyFat = (profile.dailyFatGoalG || 70) * daysInMonth;
 
-  // Calculate completion percentage
-  // If user has actual logs, calculate based on logged vs target; else default to simulated high commitment demo for preview
-  const isDemo = targetMonthLogs.length === 0;
-  const displayCalories = isDemo ? Math.floor(targetMonthlyCalories * 0.88) : actualCalories;
-  const displayProtein = isDemo ? Math.floor(targetMonthlyProtein * 0.91) : actualProtein;
-  const displayCarbs = isDemo ? Math.floor(targetMonthlyCarbs * 0.85) : actualCarbs;
-  const displayFat = isDemo ? Math.floor(targetMonthlyFat * 0.89) : actualFat;
-  const displayLoggedDays = isDemo ? Math.floor(daysInMonth * 0.86) : uniqueLoggedDays;
-  const displayMealsCount = isDemo ? displayLoggedDays * 3 : totalMealsCount;
+  // Calculate completion percentage strictly from real player data
+  const hasLogs = targetMonthLogs.length > 0;
+  const displayCalories = actualCalories;
+  const displayProtein = actualProtein;
+  const displayCarbs = actualCarbs;
+  const displayFat = actualFat;
+  const displayLoggedDays = uniqueLoggedDays;
+  const displayMealsCount = totalMealsCount;
 
-  const caloriePercentage = Math.min(100, Math.round((displayCalories / targetMonthlyCalories) * 100));
-  const proteinPercentage = Math.min(100, Math.round((displayProtein / targetMonthlyProtein) * 100));
-  const carbsPercentage = Math.min(100, Math.round((displayCarbs / targetMonthlyCarbs) * 100));
-  const fatPercentage = Math.min(100, Math.round((displayFat / targetMonthlyFat) * 100));
-  const commitmentScore = Math.round((caloriePercentage + proteinPercentage + carbsPercentage) / 3);
+  const caloriePercentage = Math.min(100, Math.round((displayCalories / (targetMonthlyCalories || 1)) * 100));
+  const proteinPercentage = Math.min(100, Math.round((displayProtein / (targetMonthlyProtein || 1)) * 100));
+  const carbsPercentage = Math.min(100, Math.round((displayCarbs / (targetMonthlyCarbs || 1)) * 100));
+  const fatPercentage = Math.min(100, Math.round((displayFat / (targetMonthlyFat || 1)) * 100));
+  const commitmentScore = hasLogs ? Math.round((caloriePercentage + proteinPercentage + carbsPercentage) / 3) : 0;
 
   // Daily Averages vs Goals
   const targetDailyCalories = profile.dailyCalorieGoal || 2400;
@@ -92,13 +91,22 @@ export const MonthlySummaryReport: React.FC<MonthlySummaryReportProps> = ({
   const targetDailyCarbs = profile.dailyCarbsGoalG || 220;
   const targetDailyFat = profile.dailyFatGoalG || 70;
 
-  const avgDailyCalories = Math.round(displayCalories / (displayLoggedDays || 1));
-  const avgDailyProtein = Math.round(displayProtein / (displayLoggedDays || 1));
-  const avgDailyCarbs = Math.round(displayCarbs / (displayLoggedDays || 1));
-  const avgDailyFat = Math.round(displayFat / (displayLoggedDays || 1));
+  const avgDailyCalories = hasLogs ? Math.round(displayCalories / (displayLoggedDays || 1)) : 0;
+  const avgDailyProtein = hasLogs ? Math.round(displayProtein / (displayLoggedDays || 1)) : 0;
+  const avgDailyCarbs = hasLogs ? Math.round(displayCarbs / (displayLoggedDays || 1)) : 0;
+  const avgDailyFat = hasLogs ? Math.round(displayFat / (displayLoggedDays || 1)) : 0;
 
   // Performance evaluation tier
-  const getEvaluationTier = (score: number) => {
+  const getEvaluationTier = (score: number, hasLogs: boolean) => {
+    if (!hasLogs) {
+      return {
+        title: 'في انتظار تسجيل وجباتك الأولى 📝',
+        desc: 'لم تقم بتسجيل وجبات بهذا الشهر حتى الآن. ابدأ بتسجيل وجباتك اليومية لتظهر تحليلاتك وإنجازك الشخصي هنا!',
+        badgeBg: 'bg-neutral-800 text-neutral-300 border-neutral-700',
+        glowBg: 'from-neutral-800/20 via-neutral-900 to-transparent',
+        icon: TrendingUp,
+      };
+    }
     if (score >= 85) {
       return {
         title: 'أداء أسطوري! ممتاز جداً 🏆',
@@ -126,7 +134,7 @@ export const MonthlySummaryReport: React.FC<MonthlySummaryReportProps> = ({
     }
   };
 
-  const evalTier = getEvaluationTier(commitmentScore);
+  const evalTier = getEvaluationTier(commitmentScore, hasLogs);
   const EvalIcon = evalTier.icon;
 
   return (

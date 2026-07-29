@@ -33,6 +33,7 @@ export const DashboardPage: React.FC = () => {
     selectedDate,
     setSelectedDate,
     mealLogs,
+    monthlyMealLogs,
     customMeals,
     isLoading,
     notification,
@@ -264,7 +265,7 @@ export const DashboardPage: React.FC = () => {
 
           {/* Cumulative Monthly Achievement Summary & Report Card */}
           <section>
-            <MonthlySummaryReport profile={profile} mealLogs={mealLogs} />
+            <MonthlySummaryReport profile={profile} mealLogs={monthlyMealLogs} />
           </section>
         </main>
       )}

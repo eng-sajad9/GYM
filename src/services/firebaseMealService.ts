@@ -298,6 +298,48 @@ export class FirebaseMealService {
   }
 
   /**
+   * Fetch all meal logs for a user across the current and previous month.
+   */
+  public static async getMonthlyMealLogs(userId: string): Promise<FirebaseMealLog[]> {
+    if (!userId) return [];
+
+    try {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth() - 2, 1).toISOString();
+
+      const q = query(
+        mealLogsCol(userId),
+        where('logged_at', '>=', startOfMonth),
+        orderBy('logged_at', 'desc')
+      );
+
+      const snap = await getDocs(q);
+      return snap.docs.map((docSnap) => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          user_id: data.user_id,
+          logged_at: data.logged_at,
+          meal_type: data.meal_type,
+          source: data.source,
+          raw_input_ar: data.raw_input_ar,
+          normalized_input_ar: data.normalized_input_ar,
+          translated_input_en: data.translated_input_en,
+          total_calories: data.total_calories || 0,
+          total_protein_g: data.total_protein_g || 0,
+          total_carbs_g: data.total_carbs_g || 0,
+          total_fat_g: data.total_fat_g || 0,
+          total_sugar_g: data.total_sugar_g || 0,
+          meal_items: [],
+        };
+      });
+    } catch (err) {
+      console.error('[FirebaseMealService] getMonthlyMealLogs error:', err);
+      return [];
+    }
+  }
+
+  /**
    * Update a meal log document in Firestore.
    */
   public static async updateMealLog(
