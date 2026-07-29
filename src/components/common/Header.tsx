@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Flame, Bot, PlusCircle, UserCircle, Settings, LayoutDashboard, User, LogOut } from 'lucide-react';
 import { UserProfile } from '../../types';
 
@@ -21,8 +21,41 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
 
+  // Smart Auto-Hide Header State
+  const [isVisible, setIsVisible] = useState<boolean>(true);
+  const [lastScrollY, setLastScrollY] = useState<number>(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Always display header at top of page
+      if (currentScrollY < 30) {
+        setIsVisible(true);
+        setLastScrollY(currentScrollY);
+        return;
+      }
+
+      // Hide when scrolling down, Show when scrolling up
+      if (currentScrollY > lastScrollY && currentScrollY - lastScrollY > 12) {
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY && lastScrollY - currentScrollY > 6) {
+        setIsVisible(true);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
   return (
-    <header className="bg-neutral-900/95 backdrop-blur-md border-b border-neutral-800 sticky top-0 z-40 dir-rtl font-cairo">
+    <header
+      className={`bg-neutral-900/95 backdrop-blur-md border-b border-neutral-800 sticky top-0 z-40 dir-rtl font-cairo transition-transform duration-300 ease-in-out ${
+        isVisible ? 'translate-y-0 shadow-xl' : '-translate-y-full'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 min-h-[64px]">
         {/* Brand Logo & Name */}
         <div className="flex items-center justify-between w-full sm:w-auto gap-3">
